@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ved Jannu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #000000; --surface: #0a0a0a; --surface2: #111111; --border: #1e1e1e;
+      --orange: #ff6600; --text: #e8d5b0; --text-bright: #f5e6c8; --muted: #555544;
+      --green: #00cc44; --red: #cc2200;
+      --mono: 'Space Mono', monospace; --sans: 'Inter', sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); }
+    .site { max-width: 860px; margin: 0 auto; padding: 0 28px 80px; }
+    #candleCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
+
+    /* HEADER */
+    .header { padding: 26px 0 0; display: flex; align-items: flex-start; justify-content: space-between; }
+    .identity-name { font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--orange); line-height: 1.2; }
+    .identity-sub { font-family: var(--mono); font-size: 11px; color: var(--text); letter-spacing: 0.03em; margin-top: 5px; opacity: 0.55; }
+    .nav-pills { display: flex; gap: 10px; padding-top: 4px; }
+    .nav-pill { font-family: var(--mono); font-size: 9px; color: var(--orange); text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase; border: 1px solid var(--orange); padding: 5px 12px; transition: all 0.15s; white-space: nowrap; }
+    .nav-pill:hover { background: var(--orange); color: #000; }
+
+    /* TICKER */
+    .ticker-wrap { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); overflow: hidden; height: 30px; display: flex; align-items: center; margin: 16px -28px 56px; }
+    .ticker-label { font-family: var(--mono); font-size: 9px; color: var(--orange); padding: 0 14px; white-space: nowrap; border-right: 1px solid var(--border); height: 100%; display: flex; align-items: center; flex-shrink: 0; letter-spacing: 0.1em; }
+    .ticker-track { display: flex; animation: scroll 75s linear infinite; white-space: nowrap; }
+    .tick { font-family: var(--mono); font-size: 9px; padding: 0 18px; border-right: 1px solid var(--border); height: 30px; display: flex; align-items: center; gap: 5px; }
+    .tick .sym { color: var(--text-bright); letter-spacing: 0.03em; }
+    .tick .up { color: var(--green); } .tick .dn { color: var(--red); } .tick .neu { color: var(--orange); }
+    @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+    /* STATUS */
+    .status-line { font-family: var(--mono); font-size: 10px; color: var(--orange); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 56px; display: flex; align-items: center; gap: 10px; min-height: 16px; }
+    .status-line::before { content: ''; display: block; width: 20px; height: 1px; background: var(--orange); flex-shrink: 0; }
+    .spinner { display: inline-block; width: 8px; height: 8px; border: 1px solid var(--orange); border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .status-text { transition: opacity 0.3s; }
+
+    /* SECTION LABEL */
+    .section-label { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* TAGLINE */
+    .section-tagline { font-family: var(--mono); font-size: 10px; letter-spacing: 0.04em; margin-bottom: 18px; line-height: 1.6; display: flex; flex-wrap: wrap; }
+    .tphrase { color: var(--muted); transition: color 0.4s ease, text-shadow 0.4s ease; margin-right: 6px; }
+    .tphrase.lit { color: var(--orange); text-shadow: 0 0 12px rgba(255,102,0,0.5); }
+
+    /* BLOTTER CARDS */
+    .work-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 72px; }
+    .work-card { background: var(--surface); padding: 28px 26px; }
+    .work-card-eyebrow { font-family: var(--mono); font-size: 8px; color: var(--orange); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+    .work-card-eyebrow::before { content: ''; width: 5px; height: 5px; background: var(--orange); border-radius: 50%; flex-shrink: 0; }
+    .work-card-title { font-family: var(--mono); font-size: 15px; font-weight: 700; color: var(--text-bright); margin-bottom: 16px; line-height: 1.25; }
+    .work-card-lines { display: flex; flex-direction: column; gap: 7px; }
+    .work-line { font-family: var(--mono); font-size: 10px; line-height: 1.5; display: flex; gap: 8px; }
+    .work-line::before { content: '//'; color: var(--border); flex-shrink: 0; }
+    .work-line span { color: var(--text); } .work-line .dim { color: var(--muted); }
+    .live-dot { display: inline-block; width: 6px; height: 6px; background: var(--green); border-radius: 50%; margin-right: 6px; animation: pulse 2s ease-in-out infinite; vertical-align: middle; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    /* TERMINAL */
+    .terminal { background: var(--surface); border: 1px solid var(--border); margin-bottom: 72px; }
+    .terminal-bar { background: #080800; border-bottom: 1px solid var(--border); padding: 9px 14px; display: flex; align-items: center; gap: 7px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border); }
+    .terminal-title { font-size: 9px; color: var(--muted); letter-spacing: 0.08em; margin-left: 6px; font-family: var(--mono); }
+    .terminal-body { padding: 22px; line-height: 2.1; font-family: var(--mono); }
+    .terminal-body p { font-size: 11px; }
+    .tp { color: var(--muted); } .tg { color: var(--orange); } .tw { color: var(--text); }
+    .blink { animation: blink 1s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* THROWBACKS */
+    .vid-list { margin-bottom: 72px; margin-top: 18px; }
+    .vid-item { display: grid; grid-template-columns: 28px 1fr auto; gap: 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); text-decoration: none; }
+    .vid-num { font-family: var(--mono); font-size: 9px; color: var(--muted); }
+    .vid-title { font-family: var(--mono); font-size: 11px; color: var(--text-bright); line-height: 1.4; }
+    .vid-grade { font-family: var(--mono); font-size: 9px; color: var(--orange); border: 1px solid var(--orange); padding: 4px 10px; white-space: nowrap; letter-spacing: 0.06em; text-decoration: none; transition: all 0.15s; display: inline-block; }
+    .vid-grade:hover { background: var(--orange); color: #000; }
+
+    /* FOOTER */
+    footer { border-top: 1px solid var(--border); padding-top: 28px; display: flex; justify-content: space-between; align-items: center; }
+    .footer-mono { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.05em; }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-family: var(--mono); font-size: 9px; color: var(--muted); text-decoration: none; letter-spacing: 0.05em; transition: color 0.15s; }
+    .footer-links a:hover { color: var(--orange); }
+  </style>
+</head>
+<body>
+
+<canvas id="candleCanvas"></canvas>
+
+<div class="site">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="identity-name">Ved Jannu</div>
+      <div class="identity-sub">Computational and Applied Mathematics — UChicago</div>
+    </div>
+    <div class="nav-pills">
+      <a class="nav-pill" href="https://www.linkedin.com/in/ved-jannu-601b88213/" target="_blank">LinkedIn ↗</a>
+      <a class="nav-pill" href="resume.pdf" target="_blank">Resume ↗</a>
+    </div>
+  </div>
+
+  <!-- TICKER -->
+  <div class="ticker-wrap">
+    <div class="ticker-label">VJ:INDEX</div>
+    <div style="overflow:hidden;flex:1;display:flex;align-items:center;">
+      <div class="ticker-track" id="tickerTrack"></div>
+    </div>
+  </div>
+
+  <!-- STATUS SPINNER -->
+  <div class="status-line">
+    <span class="spinner"></span>
+    <span class="status-text" id="statusText"></span>
+  </div>
+
+  <!-- VED'S BLOTTER -->
+  <div class="section-label">Ved's Blotter</div>
+  <div class="section-tagline">
+    <span class="tphrase" id="tp1">Long the self.</span>
+    <span class="tphrase" id="tp2">Short complacency.</span>
+  </div>
+
+  <div class="work-cards">
+    <div class="work-card">
+      <div class="work-card-eyebrow"><span class="live-dot"></span>Live Position</div>
+      <div class="work-card-title">Green Venturaa Capital</div>
+      <div class="work-card-lines">
+        <div class="work-line"><span>Quantitative Trading Intern</span></div>
+        <div class="work-line"><span>Futures &amp; Equities</span></div>
+        <div class="work-line"><span class="dim">Bradenton, FL · Summer 2026</span></div>
+        <div class="work-line"><span class="dim">Quant analytics tools for live trading decisions</span></div>
+      </div>
+    </div>
+    <div class="work-card">
+      <div class="work-card-eyebrow"><span class="live-dot"></span>Active Research</div>
+      <div class="work-card-title">Fed Communication Signal</div>
+      <div class="work-card-lines">
+        <div class="work-line"><span>NLP pipeline across 29 years of Fedspeak</span></div>
+        <div class="work-line"><span>Hawkish/dovish → Treasury &amp; equity predictions</span></div>
+        <div class="work-line"><span class="dim">Mentored by Tudor PM · paper in progress</span></div>
+        <div class="work-line"><span class="dim">ChronoGPT implementation underway</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <div class="section-label">About</div>
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      <div class="terminal-title">~/about — zsh</div>
+    </div>
+    <div class="terminal-body">
+      <p><span class="tp">❯ </span><span class="tg">cat</span><span class="tw"> about.txt</span></p>
+      <p><span class="tp"># </span><span class="tw">UChicago CAAM &amp; Econ — Financial Markets Program (UChicago Booth)</span></p>
+      <p><span class="tp"># </span><span class="tw">Research: Fed NLP signals, options LP strategies, interpretability-alpha tradeoffs</span></p>
+      <p><span class="tp"># </span><span class="tw">After hours: BJJ, lifting, poker, sudoku, Jared Vennett energy</span></p>
+      <p><span class="tp">❯ </span><span class="tg">echo</span><span class="tw"> $CONTACT</span></p>
+      <p><span class="tw">860-266-0577 | vedjannu@uchicago.edu</span></p>
+      <p><span class="tp">❯ <span class="blink">█</span></span></p>
+    </div>
+  </div>
+
+  <!-- THROWBACKS -->
+  <div class="section-label">Throwbacks</div>
+  <div class="vid-list">
+    <div class="vid-item">
+      <div class="vid-num">01</div>
+      <div class="vid-title">Simultaneous Equations</div>
+      <a class="vid-grade" href="https://www.youtube.com/watch?v=92YCdRunR74&t=31s" target="_blank">3rd Grade ↗</a>
+    </div>
+    <div class="vid-item">
+      <div class="vid-num">02</div>
+      <div class="vid-title">Wishful Thinking in Mathematics</div>
+      <a class="vid-grade" href="https://www.youtube.com/watch?v=SnYgh3-7EOs&t=12s" target="_blank">4th Grade ↗</a>
+    </div>
+    <div class="vid-item">
+      <div class="vid-num">03</div>
+      <div class="vid-title">JEE Complex Numbers</div>
+      <a class="vid-grade" href="https://www.youtube.com/watch?v=_kNEzyq6Pkc&t=77s" target="_blank">5th Grade ↗</a>
+    </div>
+    <div class="vid-item">
+      <div class="vid-num">04</div>
+      <div class="vid-title">Improper Integrals</div>
+      <a class="vid-grade" href="https://www.youtube.com/watch?v=OOkJPEIv4XI&t=534s" target="_blank">6th Grade ↗</a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-mono">© 2026 VED JANNU — all systems nominal</div>
+    <div class="footer-links">
+      <a href="https://github.com/Vedjannu" target="_blank">github ↗</a>
+      <a href="https://www.linkedin.com/in/ved-jannu-601b88213/" target="_blank">linkedin ↗</a>
+      <a href="mailto:vedjannu@uchicago.edu">email ↗</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+// ── CANDLESTICK TRAIL ──────────────────────────────────────────
+const canvas = document.getElementById('candleCanvas');
+const ctx = canvas.getContext('2d');
+function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resize();
+window.addEventListener('resize', resize);
+
+const candles = [];
+let mouseX = -999, mouseY = -999, isMoving = false, moveTimeout = null, spawnTimer = 0;
+function randBetween(a, b) { return a + Math.random() * (b - a); }
+function spawnCandle(x, y) {
+  candles.push({
+    x: x + randBetween(-28, 28), y: y + randBetween(-28, 28),
+    bodyH: randBetween(8, 32), bodyW: randBetween(5, 10),
+    wickTop: randBetween(2, 14), wickBot: randBetween(2, 14),
+    bullish: Math.random() > 0.45, alpha: 0.85, decay: randBetween(0.018, 0.032)
+  });
+  if (candles.length > 60) candles.shift();
+}
+window.addEventListener('mousemove', e => {
+  mouseX = e.clientX; mouseY = e.clientY; isMoving = true;
+  clearTimeout(moveTimeout);
+  moveTimeout = setTimeout(() => { isMoving = false; }, 80);
+});
+function draw(ts) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (isMoving && ts - spawnTimer > 40) {
+    for (let i = 0; i < Math.floor(randBetween(1, 3)); i++) spawnCandle(mouseX, mouseY);
+    spawnTimer = ts;
+  }
+  for (let i = candles.length - 1; i >= 0; i--) {
+    const c = candles[i];
+    c.alpha -= c.decay;
+    if (c.alpha <= 0) { candles.splice(i, 1); continue; }
+    const col = c.bullish ? `rgba(0,204,68,${c.alpha})` : `rgba(204,34,0,${c.alpha})`;
+    ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(c.x, c.y - c.bodyH/2 - c.wickTop);
+    ctx.lineTo(c.x, c.y + c.bodyH/2 + c.wickBot);
+    ctx.stroke();
+    ctx.fillRect(c.x - c.bodyW/2, c.y - c.bodyH/2, c.bodyW, c.bodyH);
+  }
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+
+// ── TICKER ─────────────────────────────────────────────────────
+const ticks = [
+  {sym:"MONSTER_INTAKE",val:"4",dir:"dn"},
+  {sym:"BENCH_PR",val:"800lbs",dir:"up"},
+  {sym:"TOKENS_USED",val:"1.2M",dir:"dn"},
+  {sym:"POLOS_PURCHASED",val:"7",dir:"up"},
+  {sym:"TSN_WATCHED",val:"14x",dir:"up"},
+  {sym:"VENNETT_VIBE",val:"MAX",dir:"up"},
+  {sym:"SHARPE_RATIO",val:"2.31",dir:"up"},
+  {sym:"SLEEP_HRS",val:"4.2",dir:"dn"},
+  {sym:"PSETS_DUE",val:"3",dir:"dn"},
+  {sym:"BJJ_TAPS_GIVEN",val:"∞",dir:"dn"},
+  {sym:"SORENESS_LVL",val:"CRITICAL",dir:"dn"},
+  {sym:"OW_SR",val:"3820",dir:"up"},
+  {sym:"DINING_HALL_MEALS",val:"0",dir:"up"},
+  {sym:"ALPHA_GENERATED",val:"POSITIVE",dir:"up"},
+  {sym:"TABS_OPEN",val:"61",dir:"dn"},
+  {sym:"COMMITS_TODAY",val:"19",dir:"up"},
+  {sym:"BELT_RANK",val:"WHITE",dir:"neu"},
+  {sym:"PAPERS_READ_YTD",val:"183",dir:"up"},
+  {sym:"SUNLIGHT_TODAY",val:"0min",dir:"dn"},
+  {sym:"APP_USERS",val:"500K+",dir:"up"},
+  {sym:"FED_STMTS_PARSED",val:"~500",dir:"up"},
+  {sym:"STARTUP_IDEAS",val:"∞",dir:"up"},
+  {sym:"CHECKS_RAISED",val:"14",dir:"up"},
+  {sym:"LARP",val:"67",dir:"up"},
+];
+const track = document.getElementById('tickerTrack');
+[...ticks, ...ticks].forEach(t => {
+  const el = document.createElement('div');
+  el.className = 'tick';
+  const arrow = t.dir === 'up' ? '▲' : t.dir === 'dn' ? '▼' : '●';
+  el.innerHTML = `<span class="sym">${t.sym}</span><span class="${t.dir}">${arrow} ${t.val}</span>`;
+  track.appendChild(el);
+});
+
+// ── TAGLINE ────────────────────────────────────────────────────
+const tphrases = [document.getElementById('tp1'), document.getElementById('tp2')];
+let tIdx = 0;
+function lightNext() {
+  tphrases.forEach(p => p.classList.remove('lit'));
+  tphrases[tIdx].classList.add('lit');
+  tIdx = (tIdx + 1) % tphrases.length;
+}
+lightNext();
+setInterval(lightNext, 1400);
+
+// ── STATUS PHRASES ─────────────────────────────────────────────
+const statusPhrases = [
+  "calculating P(getting a job | UChicago CAAM)",
+  "solving: if 200 applicants, top 7 selected, what's the z-score?",
+  "running NLP on 29 years of Jerome Powell's feelings",
+  "attempting triangle choke from half guard",
+  "\"I'm jacked to the tits\" — Jared Vennett, role model",
+  "backtesting SPY options since before I could drive",
+  "\"you know what those bankers did? I do\" — The Big Short",
+  "sweeping from butterfly guard, eating canvas instead",
+  "computing expected value of another polo purchase",
+  "\"how does it feel to be wrong?\" — every losing trade",
+  "Floating at Griffith Observatory",
+  "Parachuting off Hoover Tower",
+  "Stargazing in the midway",
+  "Doomscrolling LinkedIn",
+  "Trying not to fold trips",
+];
+let sIdx = 0;
+const statusEl = document.getElementById('statusText');
+statusEl.textContent = statusPhrases[0];
+setInterval(() => {
+  statusEl.style.opacity = '0';
+  setTimeout(() => {
+    sIdx = (sIdx + 1) % statusPhrases.length;
+    statusEl.textContent = statusPhrases[sIdx];
+    statusEl.style.opacity = '1';
+  }, 300);
+}, 3500);
+</script>
+
+</body>
+</html>
